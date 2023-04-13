@@ -13,7 +13,7 @@ url = 'owid-co2-data.csv'
 df = pd.read_csv(url, usecols=['country', 'year', 'iso_code', 'cumulative_luc_co2', 'co2_per_capita', 'gdp'])
 
 # Create a slider to select a year
-min_year = 2010
+min_year = 2008
 max_year = int(df['year'].max())
 selected_year = st.slider('Select a year', min_value=min_year, max_value=max_year, value=2011)
 
@@ -68,7 +68,7 @@ with col3:
                 x='year',
                 y='co2_per_capita',
                 color='country',
-                title=f'Top 10 CO₂ Emissions per Capita (2010 - 2021)',
+                title=f'Top 10 CO₂ Emissions per Capita (2008 - 2021)',
                 markers=True,
                 line_group='country',
                 range_x=[min_year, max_year],

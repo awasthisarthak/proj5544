@@ -10,7 +10,7 @@ st.header('CO₂ Emissions Dashboard')
 
 # Load data
 url = 'owid-co2-data.csv'
-df = pd.read_csv(url, usecols=['country', 'year', 'iso_code', 'cumulative_luc_co2', 'co2_per_capita', 'gdp'])
+df = pd.read_csv(url, usecols=['country', 'year', 'iso_code', 'cumulative_luc_co2', 'co2_per_capita', 'gdp', 'population'])
 
 # Create a slider to select a year
 min_year = 2008
@@ -32,7 +32,8 @@ with col1:
                         range_color=(0,25),
                         hover_name='country',
                         title=f'CO₂ Emissions Map per Capita ({selected_year})',
-                        color_continuous_scale='blues')
+                        color_continuous_scale=px.colors.sequential.Plasma)
+    
     st.plotly_chart(fig)
 
 # Add bar chart to the second column
@@ -44,13 +45,17 @@ with col2:
     data = data[data['country'].isin(countries)]
 
     # Sort data by co2_per_capita in descending order
-    data = data.sort_values('co2_per_capita', ascending=False)
+    data = data.sort_values('population', ascending=False)
 
     fig = px.bar(data_frame=data,
                  x='country',
-                 y='co2_per_capita',
+                 y='population',
                  color='country',
-                 title=f'CO₂ Emissions per Capita Bar Chart ({selected_year})')
+                 title=f'Country vs. Population Bar Chart ({selected_year})',
+                 ).update_layout(
+                    xaxis_title='Country', 
+                    yaxis_title='Population'
+                )
     
     st.plotly_chart(fig)
 

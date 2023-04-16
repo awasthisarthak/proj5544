@@ -22,6 +22,7 @@ data = df[df['year'] == selected_year]
 
 # Create two columns for the charts
 col1, space, col2 = st.columns([10, 1, 10])
+col3, space2, col4 = st.columns((10,1,10))
 
 # Add choropleth map to the first column
 with col1:
@@ -53,44 +54,67 @@ with col2:
     
     st.plotly_chart(fig)
 
-col3, space2, col4, space3, col5 = st.columns((10,1,10,1,10))
-
 with col3:
+    """Plots Line plot of CO2 emissions per capita by country and year"""
 
-    # Get top 10 countries by co2_per_capita for the selected year range
-    top_10_countries = df[(df['year'] >= min_year) & (df['year'] <= max_year)].nlargest(82, 'co2_per_capita')['country'].tolist()
+    #read in text file of all countries
+    f = open('countries','r')
+    data = f.read()
+    countries = data.replace('\n', ',').split(",")
 
-    # Filter data for the top 10 countries
-    data = df[df['country'].isin(top_10_countries)]
+    #get mean co2 per capita for each country within our time span
+    country_emissions = df[['co2_per_capita', 'country', 'year']][(df['year'] >= min_year) & (df['year'] <= max_year)]
+    country_emissions = country_emissions.groupby(['country', 'year']).mean().reset_index()
+    country_emissions = country_emissions.dropna()
+    country_emissions.year = pd.to_datetime(country_emissions.year, format='%Y')
 
-    # Create a line plot with markers for the top 10 countries
-    fig = px.line(data_frame=data,
-                x='year',
-                y='co2_per_capita',
-                color='country',
-                title=f'Top 10 CO₂ Emissions per Capita (2008 - 2021)',
-                markers=True,
-                line_group='country',
-                range_x=[min_year, max_year],
-                range_y=[0, 50])
+    #filter out non-country entries
+    country_emissions = country_emissions[country_emissions.country.isin(countries)]
+
+    #generate plotly figure
+    fig = px.line(country_emissions, 
+                  x="year", 
+                  y="co2_per_capita", 
+                  color='country', 
+                  title= 'CO2 Emissions by Country',
+                  markers=True,
+                  width=1000,
+                  height=500,
+                  labels={'co2_per_capita': 'CO2 per capita', 'year': 'Year', 'country': 'Country'} 
+                ) 
+    
     st.plotly_chart(fig)
 
 with col4:
-    # Get the top 30 countries by GDP
-    top_30_countries = df[df['year'] == max_year].nlargest(82, 'gdp')['country'].tolist()
+    """ Plots Scatterplot of CO2 per capita by GDP by country"""
 
-    # Filter data for the top 30 countries and the selected year range
-    data = df[(df['country'].isin(top_30_countries)) & (df['year'] >= min_year) & (df['year'] <= max_year)]
+    #read in text file of all countries
+    f = open('countries','r')
+    data = f.read()
+    countries = data.replace('\n', ',').split(",")
 
-    # Create a scatter plot of GDP vs. cumulative LUC CO2 for the top 30 countries
-    fig = px.scatter(data_frame=data,
-                     x='cumulative_luc_co2',
-                     y='gdp',
-                     color='country',
-                     hover_name='country',
-                     title='Relationship between GDP and Cumulative LUC CO2 (Top 30 Countries)',
-                     labels={'cumulative_luc_co2': 'Cumulative LUC CO2', 'gdp': 'GDP'},
-                     trendline='ols')
+    #group data by country
+    co2_gdp = df[['country', 'gdp', 'co2_per_capita']][(df['year'] >= min_year) & (df['year'] <= max_year)]
+    co2_gdp = co2_gdp.groupby('country').mean().reset_index()
+    co2_gdp = co2_gdp.dropna()
+
+    #filter out non-country entries
+    co2_gdp = co2_gdp[co2_gdp.country.isin(countries)]
+
+    #plot scatterplot
+    fig = px.scatter(co2_gdp, 
+                    x="gdp", 
+                    y="co2_per_capita", 
+                    color="country",
+                    title="Relationship between CO2 per Capita and GDP",
+                    width=1000,
+                    height=500,
+                    labels={'co2_per_capita': 'CO2 per capita', 'gdp': 'GDP', 'country': 'Country'}
+            ).update_layout(
+                    xaxis_title='GDP (International $)', 
+                    yaxis_title='CO2 Per Capita'
+            )
     st.plotly_chart(fig)
+
 
 

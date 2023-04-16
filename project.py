@@ -28,6 +28,7 @@ col5 = st.columns(1)[0]
 
 # Add choropleth map to the first column
 with col1:
+    """Plots Choropleth map of CO2 emissions per capita"""
     fig = px.choropleth(data_frame=data,
                         locations='iso_code',
                         color='co2_per_capita',
@@ -41,6 +42,7 @@ with col1:
 
 # Add bar chart to the second column
 with col2:
+    """Plots bar chart showing country vs. population factor in terms of CO2 emissions per capita"""
     # Create a selectbox to select countries
     countries = st.multiselect('Select one or more countries', options=data['country'].unique())
 

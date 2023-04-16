@@ -53,8 +53,10 @@ with col2:
     fig = px.bar(data_frame=data,
                  x='country',
                  y='population',
-                 color='country',
+                 color='co2_per_capita',
+                 range_color=(0,25),
                  title=f'Country vs. Population Bar Chart ({selected_year})',
+                 color_continuous_scale=px.colors.sequential.Plasma,
                  ).update_layout(
                     xaxis_title='Country', 
                     yaxis_title='Population'

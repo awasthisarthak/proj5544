@@ -148,6 +148,8 @@ with col5:
     fig = go.Figure(data=[go.Scatter(
     x=list(data['gdp']), y=list(data['co2']),
     mode='markers',
-    marker_size= poplist )])
+    marker=dict(size=poplist,
+                color=list(data['co2_per_capita']),
+                colorscale='Plasma'))])
 
     st.plotly_chart(fig)

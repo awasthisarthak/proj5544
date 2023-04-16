@@ -151,4 +151,29 @@ with col5:
     st.plotly_chart(fig)
 
 
+# bubble plot
+with col4:
+    # no gdp data for 2021 and very little for any other year, may need to change dependent variable
+    df = pd.read_csv(url, usecols=['country', 'year', 'iso_code', 'cumulative_luc_co2', 'co2_per_capita', 'gdp', 'co2', 'population'])
+    data = df[df['year'] == 2015]
+    # Create a selectbox to select countries
+    countries = st.multiselect('Select one or more countries', options=data['country'].unique(), key = "1")
 
+    # Filter data for selected countries
+    data = data[data['country'].isin(countries)]
+
+    # log scale makes bubbles too close in size, linear scale has bubbles that are too small/big
+    poplist = list(data['population'])
+    for i in range(len(poplist)):
+        poplist[i] = poplist[i]/500000
+        if poplist[i] < 1:
+            poplist[i] = 5
+        if poplist[i] > 100:
+            poplist[i] = 100
+
+    fig = go.Figure(data=[go.Scatter(
+    x=list(data['gdp']), y=list(data['co2']),
+    mode='markers',
+    marker_size= poplist )])
+    
+    st.plotly_chart(fig)

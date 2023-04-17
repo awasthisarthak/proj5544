@@ -11,7 +11,7 @@ st.header('CO₂ Emissions Dashboard')
 
 # Load data
 url = 'owid-co2-data.csv'
-df = pd.read_csv(url, usecols=['country', 'year', 'iso_code', 'cumulative_luc_co2', 'co2_per_capita', 'gdp', 'population'])
+df = pd.read_csv(url, usecols=['country', 'year', 'iso_code', 'cumulative_luc_co2', 'co2_per_capita', 'gdp'])
 
 # Create a slider to select a year
 min_year = 2008
@@ -22,9 +22,9 @@ selected_year = st.slider('Select a year', min_value=min_year, max_value=max_yea
 data = df[df['year'] == selected_year]
 
 # Create two columns for the charts
-col1, col2 = st.columns([10, 10])
-col3, col4 = st.columns((10, 10))
-col5 = st.columns(1)[0]
+col1, space, col2 = st.columns([10, 1, 10])
+col3, space2, col4, = st.columns((10,1,10))
+space1,col5,space2 = st.columns([5,10,5])
 
 # Add choropleth map to the first column
 with col1:
@@ -34,9 +34,7 @@ with col1:
                         range_color=(0,25),
                         hover_name='country',
                         title=f'CO₂ Emissions Map per Capita ({selected_year})',
-                        color_continuous_scale=px.colors.sequential.Plasma,
-                        width=800, height=600)
-    
+                        color_continuous_scale='blues')
     st.plotly_chart(fig)
 
 # Add bar chart to the second column
@@ -48,17 +46,13 @@ with col2:
     data = data[data['country'].isin(countries)]
 
     # Sort data by co2_per_capita in descending order
-    data = data.sort_values('population', ascending=False)
+    data = data.sort_values('co2_per_capita', ascending=False)
 
     fig = px.bar(data_frame=data,
                  x='country',
-                 y='population',
+                 y='co2_per_capita',
                  color='country',
-                 title=f'Country vs. Population Bar Chart ({selected_year})',
-                 ).update_layout(
-                    xaxis_title='Country', 
-                    yaxis_title='Population'
-                )
+                 title=f'CO₂ Emissions per Capita Bar Chart ({selected_year})')
     
     st.plotly_chart(fig)
 
@@ -124,56 +118,30 @@ with col4:
             )
     st.plotly_chart(fig)
 
-with col5:
-    # no gdp data for 2021 and very little for any other year, may need to change dependent variable
-    df = pd.read_csv(url, usecols=['country', 'year', 'iso_code', 'cumulative_luc_co2', 'co2_per_capita', 'gdp', 'co2', 'population'])
-    data = df[df['year'] == 2015]
-    # Create a selectbox to select countries
-    countries = st.multiselect('Select one or more countries', options=data['country'].unique(), key = "1")
-
-    # Filter data for selected countries
-    data = data[data['country'].isin(countries)]
-
-    # log scale makes bubbles too close in size, linear scale has bubbles that are too small/big
-    poplist = list(data['population'])
-    for i in range(len(poplist)):
-        poplist[i] = poplist[i]/500000
-        if poplist[i] < 1:
-            poplist[i] = 5
-        if poplist[i] > 100:
-            poplist[i] = 100
-
-    fig = go.Figure(data=[go.Scatter(
-    x=list(data['gdp']), y=list(data['co2']),
-    mode='markers',
-    marker_size= poplist )])
-
-    st.plotly_chart(fig)
-
 
 # bubble plot
-with col4:
-    # no gdp data for 2021 and very little for any other year, may need to change dependent variable
+with col5:
+    # read in needed columns to df variable
     df = pd.read_csv(url, usecols=['country', 'year', 'iso_code', 'cumulative_luc_co2', 'co2_per_capita', 'gdp', 'co2', 'population'])
+    
+    # Not enough countries with gdp data in 2016-2021
     data = df[df['year'] == 2015]
+    
+    # Filter out countries with no co2 or gdp data
+    data = data.dropna(subset=['co2','gdp'])
+    
     # Create a selectbox to select countries
     countries = st.multiselect('Select one or more countries', options=data['country'].unique(), key = "1")
 
     # Filter data for selected countries
     data = data[data['country'].isin(countries)]
-
-    # log scale makes bubbles too close in size, linear scale has bubbles that are too small/big
-    poplist = list(data['population'])
-    for i in range(len(poplist)):
-        poplist[i] = poplist[i]/500000
-        if poplist[i] < 1:
-            poplist[i] = 5
-        if poplist[i] > 100:
-            poplist[i] = 100
-
-    fig = go.Figure(data=[go.Scatter(
-    x=list(data['gdp']), y=list(data['co2']),
-    mode='markers',
-    marker_size= poplist )])
     
+    # log scaled, max bubble size
+    fig = px.scatter(data, x="gdp", y="co2",
+	         size="population",
+             hover_name="country", log_x=True, size_max=60)
+
+    fig.update_layout(title = "GDP vs CO2 Emissions")
+    
+
     st.plotly_chart(fig)

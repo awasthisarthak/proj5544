@@ -11,7 +11,7 @@ st.header('CO₂ Emissions Dashboard')
 
 # Load data
 url = 'owid-co2-data.csv'
-df = pd.read_csv(url, usecols=['country', 'year', 'iso_code', 'cumulative_luc_co2', 'co2_per_capita', 'gdp', 'population'])
+df = pd.read_csv(url, usecols=['country', 'year', 'iso_code', 'cumulative_luc_co2', 'co2_per_capita', 'gdp', 'population', 'primary_energy_consumption'])
 
 # Create a slider to select a year
 min_year = 2008
@@ -24,7 +24,7 @@ data = df[df['year'] == selected_year]
 # Create two columns for the charts
 col1, col2 = st.columns([10, 10])
 col3, col4 = st.columns((10, 10))
-col5 = st.columns(1)[0]
+space1,col5,space2 = st.columns([5,10,5])
 
 # Add choropleth map to the first column
 with col1:
@@ -65,6 +65,30 @@ with col2:
                 )
     
     st.plotly_chart(fig)
+
+    with col5:
+        """Plots bubble chart showing country vs. GDP vs. primary energy consumption, with population as bubble size."""
+        # Filter data for selected countries
+        data_filtered = data[data['country'].isin(countries)]
+
+        # Sort data by population in descending order
+        data_filtered = data_filtered.sort_values('population', ascending=False)
+
+        fig = px.scatter(data_frame=data_filtered,
+                        x='gdp',
+                        y='primary_energy_consumption',
+                        size='population',
+                        color='co2_per_capita',
+                        range_color=(0, 25),
+                        title=f'Country vs. GDP vs. Primary Energy Consumption Bubble Chart ({selected_year})',
+                        color_continuous_scale=px.colors.sequential.Plasma,
+                        hover_name='country'
+                        ).update_layout(
+                            xaxis_title='GDP',
+                            yaxis_title='Primary Energy Consumption'
+                        )
+
+        st.plotly_chart(fig)
 
 with col3:
     """Plots Line plot of CO2 emissions per capita by country and year"""
@@ -128,30 +152,31 @@ with col4:
             )
     st.plotly_chart(fig)
 
-with col5:
-    # no gdp data for 2021 and very little for any other year, may need to change dependent variable
-    df = pd.read_csv(url, usecols=['country', 'year', 'iso_code', 'cumulative_luc_co2', 'co2_per_capita', 'gdp', 'co2', 'population'])
-    data = df[df['year'] == 2015]
-    # Create a selectbox to select countries
-    countries = st.multiselect('Select one or more countries', options=data['country'].unique(), key = "1")
+# with col5:
+#     # no gdp data for 2021 and very little for any other year, may need to change dependent variable
+#     df = pd.read_csv(url, usecols=['country', 'year', 'iso_code', 'cumulative_luc_co2', 'co2_per_capita', 'gdp', 'co2', 'population'])
+#     data = df[df['year'] == 2015]
+#     # Create a selectbox to select countries
+#     countries = st.multiselect('Select one or more countries', options=data['country'].unique(), key = "1")
 
-    # Filter data for selected countries
-    data = data[data['country'].isin(countries)]
+#     # Filter data for selected countries
+#     data = data[data['country'].isin(countries)]
 
-    # log scale makes bubbles too close in size, linear scale has bubbles that are too small/big
-    poplist = list(data['population'])
-    for i in range(len(poplist)):
-        poplist[i] = poplist[i]/500000
-        if poplist[i] < 1:
-            poplist[i] = 5
-        if poplist[i] > 100:
-            poplist[i] = 100
+#     # log scale makes bubbles too close in size, linear scale has bubbles that are too small/big
+#     poplist = list(data['population'])
+#     for i in range(len(poplist)):
+#         poplist[i] = poplist[i]/500000
+#         if poplist[i] < 1:
+#             poplist[i] = 5
+#         if poplist[i] > 100:
+#             poplist[i] = 100
 
-    fig = go.Figure(data=[go.Scatter(
-    x=list(data['gdp']), y=list(data['co2']),
-    mode='markers',
-    marker=dict(size=poplist,
-                color=list(data['co2_per_capita']),
-                colorscale='Plasma'))])
+#     fig = go.Figure(data=[go.Scatter(
+#     x=list(data['gdp']), y=list(data['co2_per_capita']),
+#     mode='markers',
+#     marker=dict(size=poplist,
+#                 color=list(data['co2_per_capita']),
+#                 colorscale='Plasma'))])
 
-    st.plotly_chart(fig)
+#     st.plotly_chart(fig)
+

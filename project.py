@@ -108,6 +108,7 @@ with col3:
                     size='population',
                     color='co2_per_capita',
                     range_color=(0, 25),
+                    size_max=100,
                     title=f'GDP vs. Primary Energy Consumption Bubble Chart ({selected_year})',
                     color_continuous_scale=px.colors.sequential.Plasma,
                     hover_name='country',

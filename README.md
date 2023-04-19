@@ -28,12 +28,18 @@ To install the dependencies required to run the CO2 emissions dashboard made usi
 1. Ensure that you have Python installed on your system. You can download and install Python from the official website (https://www.python.org/downloads/).
 2. Download/clone the repository.
 3. See that you have pipenv installed on your system. You can do this by running the following command in your terminal or command prompt:
+
 `pip3 install pipenv`
+
 3. Navigate to the directory where your project is located using the cd command in your terminal or command prompt.
 4. Create a new virtual environment for your project using the following command:
+
 `pipenv shell`
+
 5. Once your virtual environment is activated, you can install the required dependencies using the following command:
 
 `pipenv install streamlit plotly pandas numpy`
+
 6. Finally, you can run the CO2 emissions dashboard using the following command:
+
 `streamlit run project.py`

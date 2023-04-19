@@ -1,4 +1,5 @@
-# Final Project: CSE 5544
+# Visualizing Global CO2 Emissions 
+### Team: The Vizards (Michelle Ramirez, Sarthak Awasthi, Sebastien John)
 Streamlit app dashboard (using Plotly.)
 
 all code produced
